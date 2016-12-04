@@ -3,11 +3,7 @@ module Main where
 import Data.List
 
 isValidTri :: Int -> Int -> Int -> Bool
-isValidTri a b c
-  | a <= 0 || b <= 0 || c <= 0 = False
-  | c >= a && c >= b = (a+b) > c
-  | b >= a && b >= c = (a+c) > b
-  | a >= b && a >= c = (b+c) > a
+isValidTri a b c = (a+b) > c && (b+c) > a && (c+a) > b
 
 isValidTri' :: (Int,Int,Int) -> Bool
 isValidTri' (a,b,c) = isValidTri a b c
@@ -28,8 +24,7 @@ swap3s (x:y:z:zs) = transpose [x,y,z] ++ swap3s zs
 
 part2 :: String -> Int
 part2 s = 
-  let dInput = 
-        map (\[x,y,z] -> (x,y,z)) . swap3s . map (map rInt . words) . lines $ s in
+  let dInput = map (\[x,y,z] -> (x,y,z)) . swap3s . map (map rInt . words) . lines $ s in
     length . filter id . map isValidTri' $ dInput
 
 main :: IO ()
