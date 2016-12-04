@@ -1,6 +1,6 @@
 module Main where
 
-import Data.Char (isDigit)
+import Data.Char
 import Data.List
 import Data.Map (Map)
 import qualified Data.Map as M
@@ -12,7 +12,7 @@ data Room = Room { getName :: Name,
           deriving (Eq, Show)
 
 type Name = String
-type SecID = Integer
+type SecID = Int
 type ChkSum = String
 
 parseRoom :: String -> Room
@@ -38,14 +38,31 @@ isValidRoom (Room nm _ chk) =
     let rmMap = buildCounts (filter (/='-') nm) M.empty in
       getChkSum rmMap == chk
 
-part1 :: String -> Integer
+part1 :: String -> Int
 part1 = sidSum . filter isValidRoom . map parseRoom . lines
   where sidSum = foldr ((+) . getSID) 0
+
+shiftChar :: Int -> Char -> Char
+shiftChar n c = let c' = ord c - ord 'a' in
+  chr $ ord 'a' + (c' + n) `mod` 26
+
+transName :: Room -> String
+transName rm = (++ " " ++ (show . getSID $ rm))
+  . unwords . map g . words . map f . getName $ rm
+  where f c = case c of
+              '-' -> ' '
+              x   -> x
+        g = map (shiftChar (getSID rm))
+
+part2 :: String -> [String]
+part2 = map transName . filter isValidRoom . map parseRoom . lines
 
 main :: IO ()
 main = do
   input <- readFile "input04.txt"
   print $ part1 input
+  putStrLn . unlines . part2 $ input
+
 
 -- Test data below
 
@@ -75,3 +92,5 @@ parsed4 = parseRoom testData4
 
 initTest :: String
 initTest = unlines [testData1,testData2,testData3,testData4]
+
+testData5 = "qzmt-zixmtkozy-ivhz-343" 
