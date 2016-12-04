@@ -1,4 +1,4 @@
-module Advent01 where
+module Main where
 
 import Data.List
 
@@ -11,7 +11,6 @@ getS (L x) = x
 
 data Face = Nort | Sout | East | West
           deriving (Eq,Show)
-
 
 type Pos = (Face,(Int,Int))
 
@@ -37,23 +36,16 @@ step (i,(f,(x,y)))
                   East -> (i-1,(East,(x+1,y)))
                   Sout -> (i-1,(Sout,(x,y-1)))
                   West -> (i-1,(West,(x-1,y)))
-                  
 
+steps :: Int -> Pos -> Pos
+steps n p | n <= 0 = p
+          | otherwise =
+            let (n', p') = step (n,p) in
+              steps n' p'
 
 runInst :: Pos -> Inst -> Pos
-runInst (face,(x,y)) (R s) =
-  case face of
-    Nort -> (East, (x + s, y))
-    East -> (Sout, (x, y - s))
-    Sout -> (West, (x - s, y))
-    West -> (Nort, (x, y + s))
-runInst (face,(x,y)) (L s) =
-  case face of
-    Nort -> (West, (x - s, y))
-    East -> (Nort, (x, y + s))
-    Sout -> (East, (x + s, y))
-    West -> (Sout, (x, y - s))
-
+runInst p i = steps (getS i) (turn i p)
+                  
 elemPos :: Pos -> [Pos] -> Bool
 elemPos _ [] = False
 elemPos p0 (p:ps) = (snd p0 == snd p) || elemPos p0 ps
@@ -86,19 +78,23 @@ takeSteps' as p = map snd . takeSteps as p
 taxicab :: Pos -> Int
 taxicab (_,(x,y)) = abs x + abs y
 
-findDist :: [Inst] -> Int
-findDist = taxicab . foldl runInst (Nort,(0,0))
+parseOneInst :: String -> Inst
+parseOneInst ('R':s) = R (read s :: Int)
+parseOneInst ('L':s) = L (read s :: Int)
+parseOneInst s = error $ "Parse error, Input was: " ++ s 
 
-posList :: [Inst] -> [((Int,Int),(Int,(Int,Int)))]
-posList xs = zipWith go [1..] zs
-  where zs = map c . scanl runInst (Nort,(0,0)) $ xs
-        c (_,x) = x
-        go a x = (x,(a,x))
+parseInstList :: String -> [Inst]
+parseInstList = map parseOneInst . words . filter (/=',')
 
-posList' :: [Inst] -> [(Int,Int)]
-posList' = fmap snd . scanl runInst (Nort,(0,0))
+origin :: Pos
+origin = (Nort,(0,0))
 
-origin = (Nort,(0,0)) :: Pos
+main :: IO ()
+main = do
+  input <- readFile "input01.txt"
+  let instructions = parseInstList input
+  print . taxicab . foldl runInst origin $ instructions
+  print . taxicab . findDuplicate instructions origin $ []
 
 testData1 :: [Inst]
 testData1 = [R 2, L 3]
@@ -111,16 +107,3 @@ testData3 = [R 5, L 5, R 5, R 3]
 
 testData4 :: [Inst]
 testData4 = [R 8, R 4, R 4, R 8]
-
-probData :: [Inst]
-probData = [R 5, R 4, R 2, L 3, R 1, R 1, L 4, L 5, R 3, L 1, L 1, R 4, L 2, R 1, R 4, 
-           R 4, L 2, L 2, R 4, L 4, R 1, R 3, L 3, L 1, L 2, R 1, R 5, L 5, L 1, L 1, 
-           R 3, R 5, L 1, R 4, L 5, R 5, R 1, L 185, R 4, L 1, R 51, R 3, L 2, R 78,
-           R 1, L 4, R 188, R 1, L 5, R 5, R 2, R 3, L 5, R 3, R 4, L 1, R 2, R 2, L 4,
-           L 4, L 5, R 5, R 4, L 4, R 2, L 5, R 2, L 1, L 4, R 4, L 4, R 2, L 3, L 4, R 2,
-           L 3, R 3, R 2, L 2, L 3, R 4, R 3, R 1, L 4, L 2, L 5, R 4, R 4, L 1, R 1, L 5,
-           L 1, R 3, R 1, L 2, R 1, R 1, R 3, L 4, L 1, L 3, R 2, R 4, R 2, L 2, R 1, L 5,
-           R 3, L 3, R 3, L 1, R 4, L 3, L 3, R 4, L 2, L 1, L 3, R 2, R 3, L 2, L 1, R 4,
-           L 3, L 5, L 2, L 4, R 1, L 4, L 4, R 3, R 5, L 4, L 1, L 1, R 4, L 2, R 5, R 1,
-           R 1, R 2, R 1, R 5, L 1, L 3, L 5, R 2]
-
