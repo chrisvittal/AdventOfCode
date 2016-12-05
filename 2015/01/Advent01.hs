@@ -17,5 +17,5 @@ getPos fl xs =
 main :: IO ()
 main = do
     input <- readFile "input01.txt"
-    putStrLn $ "1: " ++ (show $ getFloor input)
+    putStrLn $ "1: " ++ (show . getFloor . concat . lines $ input)
     putStrLn $ "2: " ++ (show . getPos (-1) . concat . lines $ input)
