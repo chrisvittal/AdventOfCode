@@ -62,7 +62,7 @@ main :: IO ()
 main = do
   input <- readFile "input04.txt"
   print $ part1 input
-  putStrLn . unlines . part2 $ input
+  putStrLn . unlines . filter (isInfixOf "north") . part2 $ input
 
 -- Test data below
 
