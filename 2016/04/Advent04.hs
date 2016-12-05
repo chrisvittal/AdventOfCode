@@ -43,11 +43,12 @@ part1 = sidSum . filter isValidRoom . map parseRoom . lines
   where sidSum = foldr ((+) . getSID) 0
 
 shiftChar :: Int -> Char -> Char
-shiftChar n c = let c' = ord c - ord 'a' in
-  chr $ ord 'a' + (c' + n) `mod` 26
+shiftChar n c = let c' = ord c 
+                    n' = c' + n `mod` 26 in
+  if n' < 123 then chr n' else chr (n' - 26)
 
 transName :: Room -> String
-transName rm = (++ " " ++ (show . getSID $ rm))
+transName rm = (++ ' ' : (show . getSID $ rm))
   . unwords . map g . words . map f . getName $ rm
   where f c = case c of
               '-' -> ' '
@@ -62,7 +63,6 @@ main = do
   input <- readFile "input04.txt"
   print $ part1 input
   putStrLn . unlines . part2 $ input
-
 
 -- Test data below
 
