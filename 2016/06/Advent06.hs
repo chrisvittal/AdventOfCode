@@ -28,8 +28,8 @@ translate' = map leastCommon . transpose
 main :: IO ()
 main = do
     input <- readFile "input06.txt"
-    putStrLn . translate . lines $ input
-    putStrLn . translate'. lines $ input
+    putStrLn $ "1: " ++ (translate . lines $ input)
+    putStrLn $ "2: " ++ (translate' . lines $ input)
 
 testData = [r|eedadn
 drvtee
